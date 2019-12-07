@@ -22,7 +22,7 @@ const Search = React.memo(props => {
             id: key
           });
         }
-        // onFilterIng(loadedIng);
+        onFilterIng(loadedIng);
       });
   }, [filterIng, onFilterIng]);
 

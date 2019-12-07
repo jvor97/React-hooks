@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 import IngredientForm from "./IngredientForm";
@@ -9,22 +9,23 @@ function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
 
   console.log(ingredients);
-  useEffect(() => {
-    axios
-      .get("https://react-hooks-aa71d.firebaseio.com/ingredients.json")
-      .then(response => {
-        let loadedIng = [];
-        for (const key in response.data) {
-          loadedIng.push({
-            title: response.data[key].title,
-            amount: response.data[key.amount],
-            id: key
-          });
-        }
-        setIngredients(loadedIng);
-        console.log(response.data);
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get("https://react-hooks-aa71d.firebaseio.com/ingredients.json")
+  //     .then(response => {
+  //       let loadedIng = [];
+  //       for (const key in response.data) {
+  //         loadedIng.push({
+  //           title: response.data[key].title,
+  //           amount: response.data[key.amount],
+  //           id: key
+  //         });
+  //       }
+  //       setIngredients(loadedIng);
+  //       console.log(response.data);
+  //     });
+  // }, []);
+  //as we already call axios in search we dont need it
 
   const addIngredientHandler = ingredient => {
     axios
@@ -39,9 +40,9 @@ function Ingredients() {
       });
   };
 
-  const filterIngHandler = filterIng => {
+  const filterIngHandler = useCallback(filterIng => {
     setIngredients(filterIng);
-  };
+  }, []);
 
   const removeIngredient = id => {
     setIngredients(ingredients.filter(ing => ing.id !== id));
