@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import Card from "../UI/Card";
 import "./Search.css";
@@ -6,6 +6,7 @@ import axios from "axios";
 
 const Search = React.memo(props => {
   const [filterIng, setFilterIng] = useState("");
+  const { onFilterIng } = props;
 
   useEffect(() => {
     let query =
@@ -21,9 +22,9 @@ const Search = React.memo(props => {
             id: key
           });
         }
-        //..
+        // onFilterIng(loadedIng);
       });
-  }, [filterIng]);
+  }, [filterIng, onFilterIng]);
 
   return (
     <section className="search">

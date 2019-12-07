@@ -26,7 +26,7 @@ function Ingredients() {
       });
   }, []);
 
-  const n = ingredient => {
+  const addIngredientHandler = ingredient => {
     axios
       .post(
         "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
@@ -39,17 +39,20 @@ function Ingredients() {
       });
   };
 
+  const filterIngHandler = filterIng => {
+    setIngredients(filterIng);
+  };
+
   const removeIngredient = id => {
     setIngredients(ingredients.filter(ing => ing.id !== id));
   };
 
-  const filterIngHandler 
   return (
     <div className="App">
       <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search onFilterIng={filterIngHandler}/>
+        <Search onFilterIng={filterIngHandler} />
         <IngredientList
           ingredients={ingredients}
           onRemoveItem={removeIngredient}
