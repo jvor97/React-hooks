@@ -10,7 +10,7 @@ const Search = React.memo(props => {
   const inputRef = useRef();
 
   useEffect(() => {
-    setTimeout(() => {
+    let timeout = setTimeout(() => {
       if (filterIng !== inputRef) {
         let query =
           filterIng.length === 0
@@ -25,7 +25,7 @@ const Search = React.memo(props => {
             for (const key in response.data) {
               loadedIng.push({
                 title: response.data[key].title,
-                amount: response.data[key.amount],
+                amount: response.data[key].amount,
                 id: key
               });
             }
@@ -33,6 +33,10 @@ const Search = React.memo(props => {
           });
       }
     }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [filterIng, onFilterIng, inputRef]);
 
   return (
