@@ -45,7 +45,11 @@ function Ingredients() {
   }, []);
 
   const removeIngredient = id => {
-    setIngredients(ingredients.filter(ing => ing.id !== id));
+    axios
+      .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
+      .then(response => {
+        setIngredients(ingredients.filter(ing => ing.id !== id));
+      });
   };
 
   return (
