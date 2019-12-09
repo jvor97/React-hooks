@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useReducer } from "react";
 import axios from "axios";
 
 import IngredientForm from "./IngredientForm";
@@ -6,8 +6,22 @@ import Search from "./Search";
 import IngredientList from "./IngredientList";
 import ErrorModal from "../UI/ErrorModal";
 
+const ingredientReducer = (currentIng, action) => {
+  switch (action.type) {
+    case "SET":
+      return action.ingredients;
+    case "ADD":
+      return currentIng.concat({ ...action.ingredient });
+    case "DELETE":
+      return currentIng.filter(ing => ing.id !== action.id);
+    default:
+      break;
+  }
+};
+
 function Ingredients() {
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, dispatch] = useReducer(ingredientReducer, []);
+  // const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,9 +53,10 @@ function Ingredients() {
       .then(setLoading(true))
       .then(response => {
         setLoading(false);
-        setIngredients(
-          ingredients.concat({ ...ingredient, id: Math.random().toString() })
-        );
+        // setIngredients(
+        //   ingredients.concat({ ...ingredient, id: Math.random().toString() })
+        // );
+        dispatch({ type: "ADD", ingredient: ingredient });
       })
       .catch(error => {
         setLoading(false);
@@ -50,7 +65,8 @@ function Ingredients() {
   };
 
   const filterIngHandler = useCallback(filterIng => {
-    setIngredients(filterIng);
+    // setIngredients(filterIng);
+    dispatch({ type: "SET", ingredients: filterIng });
   }, []);
 
   const removeIngredient = id => {
@@ -59,7 +75,8 @@ function Ingredients() {
       .then(setLoading(true))
       .then(response => {
         setLoading(false);
-        setIngredients(ingredients.filter(ing => ing.id !== id));
+        // setIngredients(ingredients.filter(ing => ing.id !== id));
+        dispatch({ type: "DELETE", id: id });
       })
       .catch(error => {
         setLoading(false);
