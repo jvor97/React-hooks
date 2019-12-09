@@ -19,30 +19,33 @@ const ingredientReducer = (currentIng, action) => {
   }
 };
 
+const httpReducer = (currentHttpState, action) => {
+  switch (action.type) {
+    case "LOADING":
+      return { loading: true, error: null };
+    case "SUCCESS":
+      return { ...currentHttpState, loading: false };
+    case "ERROR":
+      return { loading: false, error: action.errorMessage };
+    case "CLOSE_ERROR":
+      return { ...currentHttpState, error: null };
+    default:
+      break;
+  }
+};
+
 function Ingredients() {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
+  const [httpState, dispatchHttp] = useReducer(httpReducer, {
+    loading: false,
+    error: null
+  });
   // const [ingredients, setIngredients] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState("");
 
   console.log(ingredients);
-  // useEffect(() => {
-  //   axios
-  //     .get("https://react-hooks-aa71d.firebaseio.com/ingredients.json")
-  //     .then(response => {
-  //       let loadedIng = [];
-  //       for (const key in response.data) {
-  //         loadedIng.push({
-  //           title: response.data[key].title,
-  //           amount: response.data[key.amount],
-  //           id: key
-  //         });
-  //       }
-  //       setIngredients(loadedIng);
-  //       console.log(response.data);
-  //     });
-  // }, []);
-  //as we already call axios in search we dont need it
+  //as we already call axios in search we dont need getting data from axios
 
   const addIngredientHandler = ingredient => {
     axios
@@ -50,17 +53,19 @@ function Ingredients() {
         "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
         ingredient
       )
-      .then(setLoading(true))
+      .then(dispatchHttp({ type: "LOADING" }))
       .then(response => {
-        setLoading(false);
+        // setLoading(false);
         // setIngredients(
         //   ingredients.concat({ ...ingredient, id: Math.random().toString() })
         // );
+        dispatchHttp({ type: "SUCCESS" });
         dispatch({ type: "ADD", ingredient: ingredient });
       })
       .catch(error => {
-        setLoading(false);
-        setError("Something went wrong");
+        // setLoading(false);
+        dispatchHttp({ type: "ERROR", errorMessage: error.message });
+        // setError("Something went wrong");
       });
   };
 
@@ -72,26 +77,30 @@ function Ingredients() {
   const removeIngredient = id => {
     axios
       .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
-      .then(setLoading(true))
+      .then(dispatchHttp({ type: "LOADING" }))
       .then(response => {
-        setLoading(false);
+        // setLoading(false);
         // setIngredients(ingredients.filter(ing => ing.id !== id));
+        dispatchHttp({ type: "SUCCESS" });
         dispatch({ type: "DELETE", id: id });
       })
       .catch(error => {
-        setLoading(false);
-        setError("Something went wrong");
+        // setLoading(false);
+        // setError("Something went wrong");
+        dispatchHttp({ type: "ERROR", errorMessage: error.message });
       });
   };
 
   return (
     <div className="App">
-      {error && (
-        <ErrorModal onClose={() => setError(false)}>{error}</ErrorModal>
+      {httpState.error && (
+        <ErrorModal onClose={() => dispatchHttp({ type: "CLOSE_ERROR" })}>
+          {httpState.error}
+        </ErrorModal>
       )}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        loading={loading}
+        loading={httpState.loading}
       />
 
       <section>
