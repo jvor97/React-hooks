@@ -4,6 +4,7 @@ import axios from "axios";
 import IngredientForm from "./IngredientForm";
 import Search from "./Search";
 import IngredientList from "./IngredientList";
+import ErrorModal from "../UI/ErrorModal";
 
 function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
@@ -41,6 +42,10 @@ function Ingredients() {
         setIngredients(
           ingredients.concat({ ...ingredient, id: Math.random().toString() })
         );
+      })
+      .catch(error => {
+        setLoading(false);
+        setError("Something went wrong");
       });
   };
 
@@ -55,11 +60,18 @@ function Ingredients() {
       .then(response => {
         setLoading(false);
         setIngredients(ingredients.filter(ing => ing.id !== id));
+      })
+      .catch(error => {
+        setLoading(false);
+        setError("Something went wrong");
       });
   };
 
   return (
     <div className="App">
+      {error && (
+        <ErrorModal onClose={() => setError(false)}>{error}</ErrorModal>
+      )}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
         loading={loading}
