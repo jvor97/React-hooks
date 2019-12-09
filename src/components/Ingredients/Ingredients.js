@@ -7,6 +7,8 @@ import IngredientList from "./IngredientList";
 
 function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   console.log(ingredients);
   // useEffect(() => {
@@ -33,7 +35,9 @@ function Ingredients() {
         "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
         ingredient
       )
+      .then(setLoading(true))
       .then(response => {
+        setLoading(false);
         setIngredients(
           ingredients.concat({ ...ingredient, id: Math.random().toString() })
         );
@@ -47,14 +51,19 @@ function Ingredients() {
   const removeIngredient = id => {
     axios
       .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
+      .then(setLoading(true))
       .then(response => {
+        setLoading(false);
         setIngredients(ingredients.filter(ing => ing.id !== id));
       });
   };
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler} />
+      <IngredientForm
+        onAddIngredient={addIngredientHandler}
+        loading={loading}
+      />
 
       <section>
         <Search onFilterIng={filterIngHandler} />
