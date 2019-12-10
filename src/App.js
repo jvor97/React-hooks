@@ -1,10 +1,17 @@
-import React from 'react';
-import Auth from './components/Auth';
+import React, { useContext } from "react";
+import Auth from "./components/Auth";
+import { AuthContext } from "./context/auth-context";
 
-import Ingredients from './components/Ingredients/Ingredients';
+import Ingredients from "./components/Ingredients/Ingredients";
+import IngredientList from "./components/Ingredients/IngredientList";
 
 const App = props => {
-  return <Ingredients />;
+  const authContext = useContext(AuthContext);
+  let content = <Auth />;
+  if (authContext.isAuth) {
+    content = <Ingredients />;
+  }
+  return content;
 };
 
 export default App;
