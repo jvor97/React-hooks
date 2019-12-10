@@ -5,6 +5,7 @@ import IngredientForm from "./IngredientForm";
 import Search from "./Search";
 import IngredientList from "./IngredientList";
 import ErrorModal from "../UI/ErrorModal";
+import useHttp from "../../hooks/http";
 
 const ingredientReducer = (currentIng, action) => {
   switch (action.type) {
@@ -19,27 +20,28 @@ const ingredientReducer = (currentIng, action) => {
   }
 };
 
-const httpReducer = (currentHttpState, action) => {
-  switch (action.type) {
-    case "LOADING":
-      return { loading: true, error: null };
-    case "SUCCESS":
-      return { ...currentHttpState, loading: false };
-    case "ERROR":
-      return { loading: false, error: action.errorMessage };
-    case "CLOSE_ERROR":
-      return { ...currentHttpState, error: null };
-    default:
-      break;
-  }
-};
+// const httpReducer = (currentHttpState, action) => {
+//   switch (action.type) {
+//     case "LOADING":
+//       return { loading: true, error: null };
+//     case "SUCCESS":
+//       return { ...currentHttpState, loading: false };
+//     case "ERROR":
+//       return { loading: false, error: action.errorMessage };
+//     case "CLOSE_ERROR":
+//       return { ...currentHttpState, error: null };
+//     default:
+//       break;
+//   }
+// };
 
 function Ingredients() {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  const [httpState, dispatchHttp] = useReducer(httpReducer, {
-    loading: false,
-    error: null
-  });
+  // const [httpState, dispatchHttp] = useReducer(httpReducer, {
+  //   loading: false,
+  //   error: null
+  // });
+  const http = useHttp();
   // const [ingredients, setIngredients] = useState([]);
   // const [loading, setLoading] = useState(false);
   // const [error, setError] = useState("");
@@ -47,60 +49,75 @@ function Ingredients() {
   console.log(ingredients);
   //as we already call axios in search we dont need getting data from axios
 
-  const addIngredientHandler = ingredient => {
-    axios
-      .post(
+  const addIngredientHandler = useCallback(
+    ingredient => {
+      http.submitHandler(
         "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
-        ingredient
-      )
-      .then(dispatchHttp({ type: "LOADING" }))
-      .then(response => {
-        // setLoading(false);
-        // setIngredients(
-        //   ingredients.concat({ ...ingredient, id: Math.random().toString() })
-        // );
-        dispatchHttp({ type: "SUCCESS" });
-        dispatch({ type: "ADD", ingredient: ingredient });
-      })
-      .catch(error => {
-        // setLoading(false);
-        dispatchHttp({ type: "ERROR", errorMessage: error.message });
-        // setError("Something went wrong");
-      });
-  };
+        "POST",
+        JSON.stringify(ingredient)
+      );
+      // axios
+      //   .post(
+      //     "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
+      //     ingredient
+      //   )
+      //   .then(dispatchHttp({ type: "LOADING" }))
+      //   .then(response => {
+      //     // setLoading(false);
+      //     // setIngredients(
+      //     //   ingredients.concat({ ...ingredient, id: Math.random().toString() })
+      //     // );
+      //     dispatchHttp({ type: "SUCCESS" });
+      //     dispatch({ type: "ADD", ingredient: ingredient });
+      //   })
+      //   .catch(error => {
+      //     // setLoading(false);
+      //     dispatchHttp({ type: "ERROR", errorMessage: error.message });
+      //     // setError("Something went wrong");
+      //   });
+    },
+    [http.submitHandler]
+  );
 
   const filterIngHandler = useCallback(filterIng => {
     // setIngredients(filterIng);
     dispatch({ type: "SET", ingredients: filterIng });
   }, []);
 
-  const removeIngredient = id => {
-    axios
-      .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
-      .then(dispatchHttp({ type: "LOADING" }))
-      .then(response => {
-        // setLoading(false);
-        // setIngredients(ingredients.filter(ing => ing.id !== id));
-        dispatchHttp({ type: "SUCCESS" });
-        dispatch({ type: "DELETE", id: id });
-      })
-      .catch(error => {
-        // setLoading(false);
-        // setError("Something went wrong");
-        dispatchHttp({ type: "ERROR", errorMessage: error.message });
-      });
-  };
+  const removeIngredient = useCallback(
+    id => {
+      http.submitHandler(
+        `https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`,
+        "DELETE"
+      );
+      // axios
+      //   .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
+      //   .then(dispatchHttp({ type: "LOADING" }))
+      //   .then(response => {
+      //     // setLoading(false);
+      //     // setIngredients(ingredients.filter(ing => ing.id !== id));
+      //     dispatchHttp({ type: "SUCCESS" });
+      //     dispatch({ type: "DELETE", id: id });
+      //   })
+      //   .catch(error => {
+      //     // setLoading(false);
+      //     // setError("Something went wrong");
+      //     dispatchHttp({ type: "ERROR", errorMessage: error.message });
+      //   });
+    },
+    [http.submitHandler]
+  );
 
   return (
     <div className="App">
-      {httpState.error && (
+      {/* {httpState.error && (
         <ErrorModal onClose={() => dispatchHttp({ type: "CLOSE_ERROR" })}>
           {httpState.error}
         </ErrorModal>
-      )}
+      )} */}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
-        loading={httpState.loading}
+        loading={http.isLoading}
       />
 
       <section>
