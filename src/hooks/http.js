@@ -3,14 +3,19 @@ import { useCallback, useReducer } from "react";
 const httpReducer = (currentHttpState, action) => {
   switch (action.type) {
     case "LOADING":
-      return { loading: true, error: null, data: null };
+      return {
+        loading: true,
+        error: null,
+        data: null,
+        extra: null,
+        identifier: action.identifier
+      };
     case "SUCCESS":
       return {
         ...currentHttpState,
         loading: false,
         data: action.responseData,
-        extra: action.extra,
-        identifier: action.identifier
+        extra: action.extra
       };
     case "ERROR":
       return { loading: false, error: action.errorMessage };
@@ -27,10 +32,10 @@ const useHttp = () => {
     error: null,
     data: null,
     extra: null,
-    identifier: ""
+    identifier: null
   });
   const submitHandler = useCallback((url, method, body, extra, identifier) => {
-    dispatchHttp({ type: "LOADING" });
+    dispatchHttp({ type: "LOADING", identifier: identifier });
     fetch(url, {
       method: method,
       body: body,
@@ -45,8 +50,7 @@ const useHttp = () => {
         dispatchHttp({
           type: "SUCCESS",
           responseData: responseData,
-          extra: extra,
-          identifier: identifier
+          extra: extra
         });
       })
       .catch(error => {
@@ -55,8 +59,9 @@ const useHttp = () => {
   }, []);
 
   const closeError = useCallback(() => {
-      dispatchHttp({type: 'CLOSE_ERROR'})
-  })
+    dispatchHttp({ type: "CLOSE_ERROR" });
+  }, []);
+  console.log(httpState.data);
   return {
     isLoading: httpState.loading,
     error: httpState.error,
