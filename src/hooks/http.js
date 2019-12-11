@@ -53,13 +53,18 @@ const useHttp = () => {
         dispatchHttp({ type: "ERROR", errorMessage: error.message });
       });
   }, []);
+
+  const closeError = useCallback(() => {
+      dispatchHttp({type: 'CLOSE_ERROR'})
+  })
   return {
     isLoading: httpState.loading,
     error: httpState.error,
     data: httpState.responseData,
     submitHandler: submitHandler,
     extra: httpState.extra,
-    identifier: httpState.identifier
+    identifier: httpState.identifier,
+    closeError: closeError
   };
 };
 

@@ -20,11 +20,9 @@ const ingredientReducer = (currentIng, action) => {
   }
 };
 
-
 function Ingredients() {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
   const http = useHttp();
-
 
   useEffect(() => {
     if (!http.isLoading && !http.error && http.identifier === "ADD_ING") {
@@ -86,11 +84,9 @@ function Ingredients() {
 
   return (
     <div className="App">
-      {/* {httpState.error && (
-        <ErrorModal onClose={() => dispatchHttp({ type: "CLOSE_ERROR" })}>
-          {httpState.error}
-        </ErrorModal>
-      )} */}
+      {http.error && (
+        <ErrorModal onClose={http.closeError}>{http.error}</ErrorModal>
+      )}
       <IngredientForm
         onAddIngredient={addIngredientHandler}
         loading={http.isLoading}
