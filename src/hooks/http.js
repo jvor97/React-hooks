@@ -5,7 +5,13 @@ const httpReducer = (currentHttpState, action) => {
     case "LOADING":
       return { loading: true, error: null, data: null };
     case "SUCCESS":
-      return { ...currentHttpState, loading: false, data: action.responseData };
+      return {
+        ...currentHttpState,
+        loading: false,
+        data: action.responseData,
+        extra: action.extra,
+        identifier: action.identifier
+      };
     case "ERROR":
       return { loading: false, error: action.errorMessage };
     case "CLOSE_ERROR":
@@ -19,9 +25,11 @@ const useHttp = () => {
   const [httpState, dispatchHttp] = useReducer(httpReducer, {
     loading: false,
     error: null,
-    data: null
+    data: null,
+    extra: null,
+    identifier: ""
   });
-  const submitHandler = useCallback((url, method, body) => {
+  const submitHandler = useCallback((url, method, body, extra, identifier) => {
     dispatchHttp({ type: "LOADING" });
     fetch(url, {
       method: method,
@@ -34,7 +42,12 @@ const useHttp = () => {
         return response.json();
       })
       .then(responseData => {
-        dispatchHttp({ type: "SUCCESS", responseData: responseData });
+        dispatchHttp({
+          type: "SUCCESS",
+          responseData: responseData,
+          extra: extra,
+          identifier: identifier
+        });
       })
       .catch(error => {
         dispatchHttp({ type: "ERROR", errorMessage: error.message });
@@ -44,7 +57,9 @@ const useHttp = () => {
     isLoading: httpState.loading,
     error: httpState.error,
     data: httpState.responseData,
-    submitHandler: submitHandler
+    submitHandler: submitHandler,
+    extra: httpState.extra,
+    identifier: httpState.identifier
   };
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useReducer } from "react";
+import React, { useState, useEffect, useCallback, useReducer } from "react";
 import axios from "axios";
 
 import IngredientForm from "./IngredientForm";
@@ -20,33 +20,24 @@ const ingredientReducer = (currentIng, action) => {
   }
 };
 
-// const httpReducer = (currentHttpState, action) => {
-//   switch (action.type) {
-//     case "LOADING":
-//       return { loading: true, error: null };
-//     case "SUCCESS":
-//       return { ...currentHttpState, loading: false };
-//     case "ERROR":
-//       return { loading: false, error: action.errorMessage };
-//     case "CLOSE_ERROR":
-//       return { ...currentHttpState, error: null };
-//     default:
-//       break;
-//   }
-// };
 
 function Ingredients() {
   const [ingredients, dispatch] = useReducer(ingredientReducer, []);
-  // const [httpState, dispatchHttp] = useReducer(httpReducer, {
-  //   loading: false,
-  //   error: null
-  // });
   const http = useHttp();
-  // const [ingredients, setIngredients] = useState([]);
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState("");
 
-  console.log(ingredients);
+
+  useEffect(() => {
+    if (!http.isLoading && !http.error && http.identifier === "ADD_ING") {
+      dispatch({
+        type: "ADD",
+        ingredient: http.extra
+      });
+    }
+    if (!http.isLoading && !http.error && http.identifier === "DELETE_ING") {
+      dispatch({ type: "DELETE", id: http.extra });
+    }
+  }, [http.identifier, http.extra, http.error]);
+
   //as we already call axios in search we dont need getting data from axios
 
   const addIngredientHandler = useCallback(
@@ -54,27 +45,10 @@ function Ingredients() {
       http.submitHandler(
         "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
         "POST",
-        JSON.stringify(ingredient)
+        JSON.stringify(ingredient),
+        ingredient,
+        "ADD_ING"
       );
-      // axios
-      //   .post(
-      //     "https://react-hooks-aa71d.firebaseio.com/ingredients.json",
-      //     ingredient
-      //   )
-      //   .then(dispatchHttp({ type: "LOADING" }))
-      //   .then(response => {
-      //     // setLoading(false);
-      //     // setIngredients(
-      //     //   ingredients.concat({ ...ingredient, id: Math.random().toString() })
-      //     // );
-      //     dispatchHttp({ type: "SUCCESS" });
-      //     dispatch({ type: "ADD", ingredient: ingredient });
-      //   })
-      //   .catch(error => {
-      //     // setLoading(false);
-      //     dispatchHttp({ type: "ERROR", errorMessage: error.message });
-      //     // setError("Something went wrong");
-      //   });
     },
     [http.submitHandler]
   );
@@ -83,12 +57,14 @@ function Ingredients() {
     // setIngredients(filterIng);
     dispatch({ type: "SET", ingredients: filterIng });
   }, []);
-
   const removeIngredient = useCallback(
     id => {
       http.submitHandler(
         `https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`,
-        "DELETE"
+        "DELETE",
+        null,
+        id,
+        "DELETE_ING"
       );
       // axios
       //   .delete(`https://react-hooks-aa71d.firebaseio.com/ingredients/${id}.json`)
